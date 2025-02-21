@@ -18,7 +18,7 @@ const controlStyle = {
 function GroupNode({ id }: NodeProps) {
 	const store = useStoreApi(); // Store API
 
-	const { deleteElements } = useReactFlow();
+	const { setNodes, deleteElements } = useReactFlow();
 
 	// Handle deletion of this group node
 	const onDelete = () => {
@@ -86,8 +86,26 @@ function GroupNode({ id }: NodeProps) {
 					}),
 				),
 			}));
+			setNodes((nodes) => {
+				return nodes.map((node) => {
+					if (node.id === id) {
+						return { ...node, width };
+					}
+					if (node.type === "group" && node.position.x > groupPosition.x) {
+						const widthDifference = width - (groupNode.width ?? 0); // 幅の差分を計算
+						return {
+							...node,
+							position: {
+								x: node.position.x + widthDifference,
+								y: node.position.y,
+							},
+						};
+					}
+					return node;
+				});
+			});
 		},
-		[id, store],
+		[id, setNodes, store],
 	);
 
 	return (
